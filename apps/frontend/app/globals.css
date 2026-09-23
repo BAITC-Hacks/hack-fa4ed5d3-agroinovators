@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+:root {
+  --background: #070611;
+  --foreground: #f7f4ff;
+
+  --panel: #0e0c1b;
+  --panel-light: #15112a;
+
+  --purple: #8b5cf6;
+  --purple-light: #a855f7;
+  --purple-neon: #c084fc;
+
+  --border: rgba(167, 139, 250, 0.16);
+  --muted: #928ca9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(139, 92, 246, 0.20),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 85% 35%,
+      rgba(168, 85, 247, 0.09),
+      transparent 25%
+    ),
+    #070611;
+
+  color: var(--foreground);
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  min-height: 100vh;
+}
+
+/* ------------------------------------------------ */
+/* Background grid */
+/* ------------------------------------------------ */
+
+.neon-grid {
+  background-image:
+    linear-gradient(
+      rgba(139, 92, 246, 0.10) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(139, 92, 246, 0.10) 1px,
+      transparent 1px
+    );
+
+  background-size: 48px 48px;
+}
+
+/* ------------------------------------------------ */
+/* Glass */
+/* ------------------------------------------------ */
+
+.glass {
+  background: rgba(14, 12, 27, 0.72);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(167, 139, 250, 0.16);
+}
+
+/* ------------------------------------------------ */
+/* Purple glow */
+/* ------------------------------------------------ */
+
+.purple-glow {
+  box-shadow:
+    0 0 25px rgba(139, 92, 246, 0.14),
+    0 0 70px rgba(168, 85, 247, 0.08);
+}
+
+.neon-border {
+  border: 1px solid rgba(192, 132, 252, 0.4);
+
+  box-shadow:
+    inset 0 0 20px rgba(139, 92, 246, 0.04),
+    0 0 15px rgba(139, 92, 246, 0.08);
+}
+
+/* ------------------------------------------------ */
+/* Gradient text */
+/* ------------------------------------------------ */
+
+.gradient-text {
+  background: linear-gradient(
+    90deg,
+    #ffffff,
+    #c4b5fd,
+    #a855f7
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+/* ------------------------------------------------ */
+/* Scrollbar */
+/* ------------------------------------------------ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070611;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #352859;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6d4db4;
+}
+
+/* ======================================== */
+/* TASKATLAS MAP */
+/* ======================================== */
+
+.taskatlas-popup .maplibregl-popup-content {
+  background: #151027 !important;
+
+  border: 1px solid rgba(167, 139, 250, 0.25);
+
+  border-radius: 18px;
+
+  padding: 16px;
+
+  color: white;
+
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.55),
+    0 0 30px rgba(139, 92, 246, 0.12);
+}
+
+.taskatlas-popup .maplibregl-popup-tip {
+  border-top-color: #151027 !important;
+
+  border-bottom-color: #151027 !important;
+}
+
+.maplibregl-ctrl-group {
+  background: #151027 !important;
+
+  border: 1px solid rgba(167, 139, 250, 0.2);
+
+  box-shadow: none !important;
+}
+
+.maplibregl-ctrl-group button {
+  filter: invert(1);
+}
+
+.maplibregl-ctrl-attrib {
+  background: rgba(7, 6, 17, 0.8) !important;
+
+  color: #8b8496 !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: #a78bfa !important;
+}
