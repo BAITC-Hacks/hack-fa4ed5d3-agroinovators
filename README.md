@@ -2,9 +2,9 @@
 Hackathon team repository for Agroinovators
 
 
-# TaskAtlas AI
+# TaskBridge
 
-**TaskAtlas AI** is an AI-powered agricultural workforce and opportunity platform that connects agricultural organizations with students, specialists, and project teams.
+**TaskBridge AI** is an AI-powered agricultural workforce and opportunity platform that connects agricultural organizations with students, specialists, and project teams.
 
 The platform helps farms, agricultural companies, laboratories, veterinary organizations, and other agricultural employers clearly describe their workforce needs, improve the quality of those requests with AI, publish them on an interactive regional map, and receive applications from relevant specialists.
 
@@ -32,7 +32,7 @@ This statement does not tell a potential candidate:
 - who the contact person is;
 - how to apply.
 
-TaskAtlas AI helps transform this incomplete request into a structured agricultural demand card.
+TaskBridge AI helps transform this incomplete request into a structured agricultural demand card.
 
 Example:
 
@@ -67,7 +67,7 @@ The intended workflow was:
 ```text
 User
   ↓
-TaskAtlas AI Chat
+TaskBridge AI Chat
   ↓
 Next.js Frontend
   ↓
@@ -106,7 +106,7 @@ A student or specialist may still need to know:
 - who the contact person is;
 - how to apply.
 
-TaskAtlas AI is designed to transform this incomplete request into a structured agricultural demand card.
+TaskBridge AI is designed to transform this incomplete request into a structured agricultural demand card.
 
 Example:
 
@@ -154,7 +154,7 @@ This description is not sufficient for candidates to understand whether they are
 
 # Our Solution
 
-TaskAtlas AI provides a structured workflow for agricultural organizations and specialists.
+TaskBridge AI provides a structured workflow for agricultural organizations and specialists.
 
 ```text
 Agricultural organization
@@ -184,7 +184,7 @@ Organization reviews applications
 Accept / Contact / Reject
 ```
 
-TaskAtlas AI does not automatically assign candidates to organizations.
+TaskBridge AI does not automatically assign candidates to organizations.
 
 The final decision always remains with the organization.
 
@@ -314,7 +314,7 @@ This is an important principle of the platform:
 
 # Agricultural Demand Readiness
 
-One of the central features of TaskAtlas AI is the **Agricultural Demand Readiness Score**.
+One of the central features of TaskBridge AI is the **Agricultural Demand Readiness Score**.
 
 Every agricultural workforce request receives a score between:
 
@@ -452,7 +452,7 @@ The organization then confirms the information and publishes the demand.
 
 # Human Confirmation
 
-TaskAtlas AI follows a human confirmation principle.
+TaskBridge AI follows a human confirmation principle.
 
 The organization must confirm that the information is correct before publication.
 
@@ -471,7 +471,7 @@ This is especially important for future AI functionality.
 
 # AI Assistant Concept
 
-TaskAtlas AI was designed to include an agricultural AI assistant that helps organizations improve incomplete workforce requests.
+TaskBridge AI was designed to include an agricultural AI assistant that helps organizations improve incomplete workforce requests.
 
 Example intended conversation:
 
@@ -479,7 +479,7 @@ Example intended conversation:
 User:
 Our farm in Bishkul needs agronomists.
 
-TaskAtlas AI:
+TaskBridge AI:
 Please clarify:
 
 1. How many agronomists do you need?
