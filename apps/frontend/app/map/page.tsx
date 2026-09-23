@@ -1,20 +1,81 @@
 import ChallengeMap from "@/components/map/ChallengeMap";
+import { agroDemands } from "@/data/agro-demands";
+
+/* =========================================================
+   CALCULATED MAP STATS
+========================================================= */
+
+const totalSpecialists = agroDemands.reduce(
+  (sum, demand) => sum + demand.requiredCount,
+  0,
+);
+
+const totalLocations = new Set(
+  agroDemands.map(
+    (demand) => demand.location.locality,
+  ),
+).size;
+
+const totalSpecialties = new Set(
+  agroDemands.map(
+    (demand) => demand.specialist,
+  ),
+).size;
+
+const highDemandLocations =
+  agroDemands.filter(
+    (demand) =>
+      demand.demandLevel === "high",
+  ).length;
+
+/* =========================================================
+   PAGE
+========================================================= */
 
 export default function MapPage() {
   return (
-    <main className="min-h-screen bg-[#070611] pb-24">
-      {/* Background glow */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+    <main
+      className="
+        min-h-screen
+        bg-[#070611]
+        pb-24
+      "
+    >
+      {/* ===================================================
+          BACKGROUND GLOW
+      =================================================== */}
+
+      <div
+        className="
+          pointer-events-none
+          fixed
+          inset-0
+          overflow-hidden
+        "
+      >
         <div
           className="
             absolute
             left-1/2
             top-[-220px]
-            h-[600px]
-            w-[900px]
+            h-[650px]
+            w-[950px]
             -translate-x-1/2
             rounded-full
             bg-violet-600/[0.10]
+            blur-[160px]
+          "
+        />
+
+        <div
+          className="
+            absolute
+            right-[-220px]
+            top-[420px]
+            h-[520px]
+            w-[520px]
+            rounded-full
+            bg-purple-600/[0.07]
             blur-[150px]
           "
         />
@@ -22,21 +83,31 @@ export default function MapPage() {
         <div
           className="
             absolute
-            right-[-200px]
-            top-[400px]
+            bottom-[-250px]
+            left-[-180px]
             h-[500px]
             w-[500px]
             rounded-full
-            bg-purple-600/[0.06]
-            blur-[140px]
+            bg-fuchsia-600/[0.04]
+            blur-[150px]
           "
         />
       </div>
 
-      <div className="relative mx-auto max-w-[1450px] px-5 pt-14 sm:px-6 lg:px-10">
-        {/* ================================================= */}
-        {/* HERO */}
-        {/* ================================================= */}
+      <div
+        className="
+          relative
+          mx-auto
+          max-w-[1450px]
+          px-5
+          pt-14
+          sm:px-6
+          lg:px-10
+        "
+      >
+        {/* =================================================
+            HERO
+        ================================================= */}
 
         <section
           className="
@@ -50,6 +121,8 @@ export default function MapPage() {
           "
         >
           <div className="max-w-4xl">
+            {/* Badge */}
+
             <div
               className="
                 mb-4
@@ -69,7 +142,7 @@ export default function MapPage() {
                 text-violet-300
               "
             >
-              Agricultural Workforce Platform
+              TaskAtlas Geo Intelligence
             </div>
 
             <h1
@@ -108,21 +181,24 @@ export default function MapPage() {
                 sm:text-lg
               "
             >
-              Интерактивная карта TaskAtlas AI показывает,
-              где сельскохозяйственным организациям нужны
-              специалисты, какие навыки требуются и сколько
-              человек необходимо.
+              TaskAtlas AI показывает спрос на
+              аграрных специалистов по населённым
+              пунктам Северо-Казахстанской области:
+              кто нужен, сколько специалистов
+              требуется, какие навыки ожидаются и
+              какие условия предлагает организация.
             </p>
           </div>
 
-          {/* Pilot badge */}
+          {/* Pilot info */}
+
           <div
             className="
               shrink-0
               rounded-2xl
               border
               border-violet-400/15
-              bg-[#100c1c]/80
+              bg-[#100c1c]/85
               px-5
               py-4
               backdrop-blur-xl
@@ -136,26 +212,90 @@ export default function MapPage() {
                 text-[#6f687d]
               "
             >
-              Первый пилот
+              Pilot Region
             </div>
 
-            <div className="mt-1 font-semibold text-white">
+            <div
+              className="
+                mt-1
+                font-semibold
+                text-white
+              "
+            >
               Северо-Казахстанская область
             </div>
 
-            <div className="mt-1 text-sm text-violet-300">
-              Петропавловск · Советское
+            <div
+              className="
+                mt-2
+                flex
+                items-center
+                gap-2
+                text-sm
+                text-violet-300
+              "
+            >
+              <span
+                className="
+                  h-2
+                  w-2
+                  rounded-full
+                  bg-violet-400
+                  shadow-[0_0_10px_rgba(167,139,250,.8)]
+                "
+              />
+
+              {totalLocations} пилотных локаций
             </div>
           </div>
         </section>
 
-        {/* ================================================= */}
-        {/* SMALL EXPLANATION */}
-        {/* ================================================= */}
+        {/* =================================================
+            REGIONAL OVERVIEW
+        ================================================= */}
 
         <section
           className="
             mb-7
+            grid
+            gap-3
+            sm:grid-cols-2
+            lg:grid-cols-4
+          "
+        >
+          <OverviewCard
+            label="Открытый спрос"
+            value={totalSpecialists.toString()}
+            description="специалиста требуется"
+          />
+
+          <OverviewCard
+            label="Локации"
+            value={totalLocations.toString()}
+            description="городов и сёл"
+          />
+
+          <OverviewCard
+            label="Специальности"
+            value={totalSpecialties.toString()}
+            description="аграрных направлений"
+          />
+
+          <OverviewCard
+            label="Высокий спрос"
+            value={highDemandLocations.toString()}
+            description="приоритетных запросов"
+            accent
+          />
+        </section>
+
+        {/* =================================================
+            SMALL EXPLANATION
+        ================================================= */}
+
+        <section
+          className="
+            mb-8
             grid
             gap-3
             md:grid-cols-3
@@ -164,25 +304,25 @@ export default function MapPage() {
           <MiniFeature
             number="01"
             title="Найдите спрос"
-            description="Смотрите, в каком городе или селе нужны специалисты."
+            description="Выберите специальность, формат работы или конкретный населённый пункт."
           />
 
           <MiniFeature
             number="02"
             title="Изучите требования"
-            description="Специальность, навыки, условия работы и readiness score."
+            description="Посмотрите количество специалистов, навыки, зарплату, проживание и readiness."
           />
 
           <MiniFeature
             number="03"
             title="Откликнитесь"
-            description="Студент или команда отправляет предложение организации."
+            description="Студент, специалист или команда может перейти к запросу и отправить предложение."
           />
         </section>
 
-        {/* ================================================= */}
-        {/* MAP */}
-        {/* ================================================= */}
+        {/* =================================================
+            MAP HEADER
+        ================================================= */}
 
         <section>
           <div
@@ -191,19 +331,48 @@ export default function MapPage() {
               flex
               flex-col
               justify-between
-              gap-3
+              gap-4
               sm:flex-row
               sm:items-center
             "
           >
             <div>
-              <h2 className="text-xl font-semibold text-white">
-                Карта открытого спроса
+              <div
+                className="
+                  text-xs
+                  font-medium
+                  uppercase
+                  tracking-[0.16em]
+                  text-violet-400
+                "
+              >
+                Regional Demand Map
+              </div>
+
+              <h2
+                className="
+                  mt-1
+                  text-xl
+                  font-semibold
+                  text-white
+                  sm:text-2xl
+                "
+              >
+                Карта открытого аграрного спроса
               </h2>
 
-              <p className="mt-1 text-sm text-[#777081]">
-                Нажмите на населённый пункт, чтобы увидеть
-                информацию о потребности.
+              <p
+                className="
+                  mt-1
+                  max-w-2xl
+                  text-sm
+                  leading-6
+                  text-[#777081]
+                "
+              >
+                Нажмите на маркер или воспользуйтесь
+                фильтрами, чтобы увидеть конкретную
+                потребность организации.
               </p>
             </div>
 
@@ -227,6 +396,7 @@ export default function MapPage() {
                 className="
                   h-2
                   w-2
+                  animate-pulse
                   rounded-full
                   bg-emerald-400
                   shadow-[0_0_12px_rgba(52,211,153,.8)]
@@ -237,76 +407,184 @@ export default function MapPage() {
             </div>
           </div>
 
+          {/* MAIN MAP */}
+
           <ChallengeMap />
         </section>
 
-        {/* ================================================= */}
-        {/* LEGEND / STATS */}
-        {/* ================================================= */}
+        {/* =================================================
+            DEMAND LEGEND
+        ================================================= */}
 
         <section className="mt-6">
           <div
             className="
               flex
-              flex-wrap
-              items-center
-              gap-x-8
-              gap-y-3
+              flex-col
+              justify-between
+              gap-4
               rounded-2xl
               border
               border-violet-400/10
               bg-[#0d0a17]
               px-5
               py-4
+              sm:flex-row
+              sm:items-center
             "
           >
-            <LegendDot
-              color="bg-violet-500"
-              label="Высокий спрос"
-            />
+            <div>
+              <div
+                className="
+                  text-xs
+                  font-medium
+                  uppercase
+                  tracking-[0.14em]
+                  text-[#696273]
+                "
+              >
+                Demand Level
+              </div>
 
-            <LegendDot
-              color="bg-amber-500"
-              label="Средний спрос"
-            />
+              <div
+                className="
+                  mt-1
+                  text-sm
+                  text-[#aaa4b5]
+                "
+              >
+                Цвет маркера показывает приоритет
+                потребности.
+              </div>
+            </div>
 
-            <LegendDot
-              color="bg-orange-500"
-              label="Открытая позиция"
-            />
+            <div
+              className="
+                flex
+                flex-wrap
+                items-center
+                gap-x-7
+                gap-y-3
+              "
+            >
+              <LegendDot
+                color="bg-violet-500"
+                label="Высокий спрос"
+              />
+
+              <LegendDot
+                color="bg-amber-500"
+                label="Средний спрос"
+              />
+
+              <LegendDot
+                color="bg-orange-500"
+                label="Открытая позиция"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* =================================================
+            CURRENT PILOT LOCATIONS
+        ================================================= */}
+
+        <section className="mt-14">
+          <div
+            className="
+              flex
+              flex-col
+              justify-between
+              gap-4
+              md:flex-row
+              md:items-end
+            "
+          >
+            <div>
+              <div
+                className="
+                  text-xs
+                  font-medium
+                  uppercase
+                  tracking-[0.16em]
+                  text-violet-400
+                "
+              >
+                Pilot coverage
+              </div>
+
+              <h2
+                className="
+                  mt-2
+                  text-2xl
+                  font-bold
+                  text-white
+                  sm:text-3xl
+                "
+              >
+                11 пилотных локаций СКО
+              </h2>
+
+              <p
+                className="
+                  mt-2
+                  max-w-2xl
+                  text-sm
+                  leading-6
+                  text-[#837c8f]
+                "
+              >
+                В MVP мы показываем региональную сеть
+                сельскохозяйственного спроса на примере
+                нескольких городов и сёл Северного
+                Казахстана.
+              </p>
+            </div>
+
+            <div
+              className="
+                text-sm
+                text-[#6f687b]
+              "
+            >
+              {totalSpecialists} открытых мест
+            </div>
           </div>
 
           <div
             className="
-              mt-4
+              mt-6
               grid
-              gap-4
-              sm:grid-cols-3
+              gap-3
+              sm:grid-cols-2
+              lg:grid-cols-3
+              xl:grid-cols-4
             "
           >
-            <StatCard
-              label="Открытый спрос"
-              value="5"
-              unit="специалистов"
-            />
-
-            <StatCard
-              label="Локации"
-              value="2"
-              unit="населённых пункта"
-            />
-
-            <StatCard
-              label="Специальности"
-              value="2"
-              unit="категории"
-            />
+            {[
+              "Петропавловск",
+              "Бишкуль",
+              "Смирново",
+              "Явленка",
+              "Булаево",
+              "Новоишимское",
+              "Тайынша",
+              "Тимирязево",
+              "Сергеевка",
+              "Талшик",
+              "Советское",
+            ].map((location) => (
+              <LocationChip
+                key={location}
+                name={location}
+              />
+            ))}
           </div>
         </section>
 
-        {/* ================================================= */}
-        {/* HOW IT CONNECTS TO PLATFORM */}
-        {/* ================================================= */}
+        {/* =================================================
+            WORKFLOW
+        ================================================= */}
 
         <section
           className="
@@ -320,43 +598,72 @@ export default function MapPage() {
             sm:p-8
           "
         >
-          <div className="max-w-3xl">
-            <div
-              className="
-                text-xs
-                font-medium
-                uppercase
-                tracking-[0.16em]
-                text-violet-400
-              "
-            >
-              End-to-end workflow
+          <div
+            className="
+              flex
+              flex-col
+              justify-between
+              gap-6
+              lg:flex-row
+              lg:items-end
+            "
+          >
+            <div className="max-w-3xl">
+              <div
+                className="
+                  text-xs
+                  font-medium
+                  uppercase
+                  tracking-[0.16em]
+                  text-violet-400
+                "
+              >
+                End-to-end workflow
+              </div>
+
+              <h2
+                className="
+                  mt-3
+                  text-2xl
+                  font-bold
+                  text-white
+                  sm:text-3xl
+                "
+              >
+                Карта — только часть TaskAtlas AI
+              </h2>
+
+              <p
+                className="
+                  mt-3
+                  leading-7
+                  text-[#8d869b]
+                "
+              >
+                Сельскохозяйственная организация
+                сначала описывает свою потребность.
+                AI выявляет недостающую информацию,
+                помогает повысить Agricultural Demand
+                Readiness, после чего запрос
+                публикуется в каталоге и появляется
+                на карте.
+              </p>
             </div>
 
-            <h2
+            <div
               className="
-                mt-3
-                text-2xl
-                font-bold
-                text-white
-                sm:text-3xl
+                rounded-xl
+                border
+                border-violet-400/15
+                bg-violet-500/[0.06]
+                px-4
+                py-3
+                text-sm
+                text-violet-200
               "
             >
-              Карта — часть полного сценария TaskAtlas AI
-            </h2>
-
-            <p
-              className="
-                mt-3
-                leading-7
-                text-[#8d869b]
-              "
-            >
-              Организация создаёт потребность, AI помогает
-              дополнить данные, readiness score растёт, после
-              публикации карточка появляется на карте, а
-              студент или команда может отправить предложение.
-            </p>
+              Need → AI → Readiness → Publish → Apply
+            </div>
           </div>
 
           <div
@@ -369,26 +676,26 @@ export default function MapPage() {
           >
             <WorkflowStep
               number="1"
-              title="Создать"
-              description="Организация описывает свою потребность."
+              title="Создать потребность"
+              description="Организация описывает проблему или нехватку специалистов."
             />
 
             <WorkflowStep
               number="2"
               title="AI уточняет"
-              description="Система находит недостающую информацию."
+              description="Система находит недостающие сведения и задаёт вопросы."
             />
 
             <WorkflowStep
               number="3"
               title="Опубликовать"
-              description="Готовая карточка появляется на карте."
+              description="Готовый запрос появляется в каталоге и на карте."
             />
 
             <WorkflowStep
               number="4"
               title="Получить отклик"
-              description="Студент или команда отправляет предложение."
+              description="Студент или специалист отправляет предложение организации."
             />
           </div>
         </section>
@@ -397,9 +704,74 @@ export default function MapPage() {
   );
 }
 
-/* ================================================= */
-/* MINI FEATURE */
-/* ================================================= */
+/* =========================================================
+   OVERVIEW CARD
+========================================================= */
+
+function OverviewCard({
+  label,
+  value,
+  description,
+  accent = false,
+}: {
+  label: string;
+  value: string;
+  description: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className="
+        rounded-2xl
+        border
+        border-violet-400/10
+        bg-[#0d0a17]
+        p-5
+      "
+    >
+      <div
+        className="
+          text-xs
+          uppercase
+          tracking-[0.12em]
+          text-[#6f687b]
+        "
+      >
+        {label}
+      </div>
+
+      <div
+        className={`
+          mt-2
+          text-4xl
+          font-bold
+
+          ${
+            accent
+              ? "text-violet-300"
+              : "text-white"
+          }
+        `}
+      >
+        {value}
+      </div>
+
+      <div
+        className="
+          mt-1
+          text-sm
+          text-[#777081]
+        "
+      >
+        {description}
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   MINI FEATURE
+========================================================= */
 
 function MiniFeature({
   number,
@@ -418,6 +790,9 @@ function MiniFeature({
         border-violet-400/10
         bg-white/[0.018]
         p-4
+        transition
+        hover:border-violet-400/20
+        hover:bg-violet-500/[0.025]
       "
     >
       <div
@@ -431,7 +806,13 @@ function MiniFeature({
         {number}
       </div>
 
-      <div className="mt-2 font-semibold text-white">
+      <div
+        className="
+          mt-2
+          font-semibold
+          text-white
+        "
+      >
         {title}
       </div>
 
@@ -449,9 +830,9 @@ function MiniFeature({
   );
 }
 
-/* ================================================= */
-/* LEGEND */
-/* ================================================= */
+/* =========================================================
+   LEGEND
+========================================================= */
 
 function LegendDot({
   color,
@@ -484,54 +865,56 @@ function LegendDot({
   );
 }
 
-/* ================================================= */
-/* STATS */
-/* ================================================= */
+/* =========================================================
+   LOCATION CHIP
+========================================================= */
 
-function StatCard({
-  label,
-  value,
-  unit,
+function LocationChip({
+  name,
 }: {
-  label: string;
-  value: string;
-  unit: string;
+  name: string;
 }) {
   return (
     <div
       className="
-        rounded-2xl
+        flex
+        items-center
+        gap-3
+        rounded-xl
         border
         border-violet-400/10
         bg-[#0d0a17]
-        p-5
+        px-4
+        py-3
       "
     >
-      <div className="text-sm text-[#777081]">
-        {label}
-      </div>
-
-      <div
+      <span
         className="
-          mt-2
-          text-4xl
-          font-bold
-          text-white
+          h-2
+          w-2
+          shrink-0
+          rounded-full
+          bg-violet-500
+          shadow-[0_0_9px_rgba(139,92,246,.65)]
+        "
+      />
+
+      <span
+        className="
+          text-sm
+          font-medium
+          text-[#b6afc1]
         "
       >
-        {value}
-      </div>
-
-      <div className="mt-1 text-sm text-[#696273]">
-        {unit}
-      </div>
+        {name}
+      </span>
     </div>
   );
 }
 
-/* ================================================= */
-/* WORKFLOW */
-/* ================================================= */
+/* =========================================================
+   WORKFLOW
+========================================================= */
 
 function WorkflowStep({
   number,
@@ -569,7 +952,13 @@ function WorkflowStep({
         {number}
       </div>
 
-      <div className="mt-4 font-semibold text-white">
+      <div
+        className="
+          mt-4
+          font-semibold
+          text-white
+        "
+      >
         {title}
       </div>
 

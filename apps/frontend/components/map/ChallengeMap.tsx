@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 
 import Map, {
@@ -14,9 +15,7 @@ import Map, {
   type MapRef,
 } from "react-map-gl/maplibre";
 
-import {
-  setWorkerUrl,
-} from "maplibre-gl";
+import { setWorkerUrl } from "maplibre-gl";
 
 import {
   BriefcaseBusiness,
@@ -27,207 +26,36 @@ import {
   GraduationCap,
   Home,
   MapPin,
+  Microscope,
   Navigation,
   RotateCcw,
   Sprout,
+  Stethoscope,
   Users,
+  Wheat,
   Wrench,
 } from "lucide-react";
 
-/*
-  Если ты уже настроил worker через public/maplibre,
-  оставляем это.
-*/
-setWorkerUrl(
-  "/maplibre/maplibre-gl-worker.mjs",
-);
+import { agroDemands } from "@/data/agro-demands";
+
+import type {
+  AgroDemand,
+  DemandLevel,
+  EmploymentType,
+  SpecialistType,
+} from "@/types/agro";
 
 /* =========================================================
-   TYPES
+   MAPLIBRE WORKER
 ========================================================= */
 
-type SpecialistType =
-  | "Agronomist"
-  | "Veterinarian"
-  | "Biotechnologist"
-  | "Agri-engineer";
-
-type EmploymentType =
-  | "Internship"
-  | "Full-time"
-  | "Part-time"
-  | "Seasonal"
-  | "Research project";
-
-type DemandLevel =
-  | "high"
-  | "medium"
-  | "open";
-
-interface AgroDemand {
-  id: string;
-
-  title: string;
-
-  organization: string;
-
-  specialist: SpecialistType;
-
-  requiredCount: number;
-
-  employmentType: EmploymentType;
-
-  skills: string[];
-
-  salary?: string;
-
-  accommodation: boolean;
-
-  contact: string;
-
-  readinessScore: number;
-
-  demandLevel: DemandLevel;
-
-  description: string;
-
-  location: {
-    region: string;
-    district?: string;
-    locality: string;
-
-    latitude: number;
-    longitude: number;
-  };
-}
+setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
 /* =========================================================
-   DEMO DATA
+   DATA
 ========================================================= */
 
-/*
-  Сейчас используем 2 известные точки.
-
-  3 agronomists + 2 biotechnology specialists
-  = 5 специалистов.
-
-  Именно поэтому статистика на map/page.tsx
-  сейчас показывает 5 специалистов / 2 локации /
-  2 специальности.
-*/
-
-const demands: AgroDemand[] = [
-  {
-    id: "sovetskoye-agronomists",
-
-    title:
-      "Агрономы для мониторинга состояния посевов",
-
-    organization:
-      "Сельскохозяйственное предприятие",
-
-    specialist: "Agronomist",
-
-    requiredCount: 3,
-
-    employmentType: "Seasonal",
-
-    skills: [
-      "Crop protection",
-      "Soil analysis",
-      "GIS",
-      "Crop monitoring",
-    ],
-
-    salary: "250 000–350 000 ₸",
-
-    accommodation: true,
-
-    contact: "agro@example.kz",
-
-    readinessScore: 90,
-
-    demandLevel: "high",
-
-    description:
-      "Хозяйству нужны специалисты для мониторинга состояния посевов, раннего выявления проблем и оценки здоровья сельскохозяйственных культур.",
-
-    location: {
-      region:
-        "Северо-Казахстанская область",
-
-      district:
-        "район Магжана Жумабаева",
-
-      locality:
-        "Советское",
-
-      latitude:
-        54.430799,
-
-      longitude:
-        70.341195,
-    },
-  },
-
-  {
-    id: "petropavlovsk-biotechnology",
-
-    title:
-      "Стажировка по агробиотехнологиям",
-
-    organization:
-      "Агробиотехнологическая лаборатория",
-
-    specialist:
-      "Biotechnologist",
-
-    requiredCount:
-      2,
-
-    employmentType:
-      "Internship",
-
-    skills: [
-      "PCR",
-      "Laboratory analysis",
-      "Plant biology",
-      "Plant diagnostics",
-    ],
-
-    salary:
-      "По результатам собеседования",
-
-    accommodation:
-      false,
-
-    contact:
-      "biolab@example.kz",
-
-    readinessScore:
-      82,
-
-    demandLevel:
-      "medium",
-
-    description:
-      "Лаборатория приглашает студентов и молодых специалистов для участия в диагностике заболеваний растений и лабораторных исследованиях.",
-
-    location: {
-      region:
-        "Северо-Казахстанская область",
-
-      locality:
-        "Петропавловск",
-
-      latitude:
-        54.861865,
-
-      longitude:
-        69.139635,
-    },
-  },
-];
+const demands = agroDemands;
 
 /* =========================================================
    MAP STYLE
@@ -246,8 +74,7 @@ const mapStyle = {
 
       tileSize: 256,
 
-      attribution:
-        "© OpenStreetMap contributors",
+      attribution: "© OpenStreetMap contributors",
     },
   },
 
@@ -260,10 +87,10 @@ const mapStyle = {
       source: "osm",
 
       paint: {
-        "raster-brightness-min": 0.18,
-        "raster-brightness-max": 0.63,
+        "raster-brightness-min": 0.16,
+        "raster-brightness-max": 0.62,
         "raster-contrast": 0.22,
-        "raster-saturation": -0.4,
+        "raster-saturation": -0.42,
       },
     },
   ],
@@ -273,24 +100,40 @@ const mapStyle = {
    OPTIONS
 ========================================================= */
 
-const specialistOptions:
-  Array<SpecialistType | "all"> = [
-    "all",
-    "Agronomist",
-    "Veterinarian",
-    "Biotechnologist",
-    "Agri-engineer",
-  ];
+const specialistOptions: Array<
+  SpecialistType | "all"
+> = [
+  "all",
+  "Agronomist",
+  "Veterinarian",
+  "Biotechnologist",
+  "Agri-engineer",
+  "Soil scientist",
+  "Plant protection specialist",
+  "Food technologist",
+  "Laboratory specialist",
+];
 
-const employmentOptions:
-  Array<EmploymentType | "all"> = [
-    "all",
-    "Internship",
-    "Full-time",
-    "Part-time",
-    "Seasonal",
-    "Research project",
-  ];
+const employmentOptions: Array<
+  EmploymentType | "all"
+> = [
+  "all",
+  "Internship",
+  "Full-time",
+  "Part-time",
+  "Seasonal",
+  "Research project",
+];
+
+const localityOptions = Array.from(
+  new Set(
+    demands.map(
+      (demand) => demand.location.locality,
+    ),
+  ),
+).sort((a, b) =>
+  a.localeCompare(b, "ru"),
+);
 
 /* =========================================================
    COMPONENT
@@ -303,66 +146,80 @@ export default function ChallengeMap() {
   const [
     selectedSpecialist,
     setSelectedSpecialist,
-  ] =
-    useState<
-      SpecialistType | "all"
-    >("all");
+  ] = useState<SpecialistType | "all">(
+    "all",
+  );
 
   const [
     selectedEmployment,
     setSelectedEmployment,
-  ] =
-    useState<
-      EmploymentType | "all"
-    >("all");
+  ] = useState<EmploymentType | "all">(
+    "all",
+  );
+
+  const [
+    selectedLocality,
+    setSelectedLocality,
+  ] = useState<string>("all");
 
   const [
     selectedDemand,
     setSelectedDemand,
-  ] =
-    useState<AgroDemand | null>(
-      demands[0],
-    );
+  ] = useState<AgroDemand | null>(
+    demands[0] ?? null,
+  );
 
   /* =======================================================
      FILTERING
   ======================================================= */
 
-  const filteredDemands =
-    useMemo(() => {
-      return demands.filter(
-        (demand) => {
-          const specialistMatches =
-            selectedSpecialist ===
-              "all" ||
-            demand.specialist ===
-              selectedSpecialist;
+  const filteredDemands = useMemo(() => {
+    return demands.filter((demand) => {
+      const specialistMatches =
+        selectedSpecialist === "all" ||
+        demand.specialist ===
+          selectedSpecialist;
 
-          const employmentMatches =
-            selectedEmployment ===
-              "all" ||
-            demand.employmentType ===
-              selectedEmployment;
+      const employmentMatches =
+        selectedEmployment === "all" ||
+        demand.employmentType ===
+          selectedEmployment;
 
-          return (
-            specialistMatches &&
-            employmentMatches
-          );
-        },
+      const localityMatches =
+        selectedLocality === "all" ||
+        demand.location.locality ===
+          selectedLocality;
+
+      return (
+        specialistMatches &&
+        employmentMatches &&
+        localityMatches
       );
-    }, [
-      selectedSpecialist,
-      selectedEmployment,
-    ]);
+    });
+  }, [
+    selectedSpecialist,
+    selectedEmployment,
+    selectedLocality,
+  ]);
 
   const totalSpecialists =
     filteredDemands.reduce(
       (sum, demand) =>
-        sum +
-        demand.requiredCount,
-
+        sum + demand.requiredCount,
       0,
     );
+
+  const uniqueLocations = new Set(
+    filteredDemands.map(
+      (demand) => demand.location.locality,
+    ),
+  ).size;
+
+  const uniqueSpecialties = new Set(
+    filteredDemands.map(
+      (demand) => demand.specialist,
+    ),
+  ).size;
 
   /* =======================================================
      MAP ACTIONS
@@ -405,42 +262,30 @@ export default function ChallengeMap() {
     const longitudes =
       filteredDemands.map(
         (demand) =>
-          demand.location
-            .longitude,
+          demand.location.longitude,
       );
 
     const latitudes =
       filteredDemands.map(
         (demand) =>
-          demand.location
-            .latitude,
+          demand.location.latitude,
       );
 
     mapRef.current?.fitBounds(
       [
         [
-          Math.min(
-            ...longitudes,
-          ),
-
-          Math.min(
-            ...latitudes,
-          ),
+          Math.min(...longitudes),
+          Math.min(...latitudes),
         ],
 
         [
-          Math.max(
-            ...longitudes,
-          ),
-
-          Math.max(
-            ...latitudes,
-          ),
+          Math.max(...longitudes),
+          Math.max(...latitudes),
         ],
       ],
 
       {
-        padding: 110,
+        padding: 80,
         duration: 1000,
       },
     );
@@ -449,35 +294,35 @@ export default function ChallengeMap() {
   }
 
   function resetFilters() {
-    setSelectedSpecialist(
-      "all",
-    );
+    setSelectedSpecialist("all");
 
-    setSelectedEmployment(
-      "all",
-    );
+    setSelectedEmployment("all");
+
+    setSelectedLocality("all");
 
     setSelectedDemand(
-      demands[0],
+      demands[0] ?? null,
     );
 
-    setTimeout(
-      () => {
-        mapRef.current?.fitBounds(
-          [
-            [68.9, 54.25],
-            [70.55, 55.0],
-          ],
+    setTimeout(() => {
+      mapRef.current?.fitBounds(
+        [
+          [66.0, 52.9],
+          [72.2, 55.15],
+        ],
 
-          {
-            padding: 90,
-            duration: 900,
-          },
-        );
-      },
+        {
+          padding: 70,
+          duration: 900,
+        },
+      );
+    }, 50);
+  }
 
-      50,
-    );
+  function clearSelection() {
+    setSelectedDemand(null);
+
+    showAllDemands();
   }
 
   /* =======================================================
@@ -512,9 +357,9 @@ export default function ChallengeMap() {
           className="
             flex
             flex-col
-            gap-4
+            gap-5
             xl:flex-row
-            xl:items-center
+            xl:items-end
             xl:justify-between
           "
         >
@@ -532,77 +377,48 @@ export default function ChallengeMap() {
             <div
               className="
                 mt-1
+                max-w-sm
                 text-xs
+                leading-5
                 text-[#756e83]
               "
             >
-              Найдите подходящую
-              аграрную специальность
-              и формат работы
+              Найдите потребность по
+              специальности, формату работы
+              или населённому пункту.
             </div>
           </div>
 
           <div
             className="
-              flex
-              flex-col
+              grid
               gap-3
-              sm:flex-row
-              sm:flex-wrap
+              sm:grid-cols-2
+              xl:flex
+              xl:flex-wrap
             "
           >
             {/* SPECIALIST */}
 
-            <div
-              className="
-                relative
-                min-w-[220px]
-              "
-            >
+            <SelectWrapper>
               <select
-                value={
-                  selectedSpecialist
-                }
-                onChange={(
-                  event,
-                ) => {
+                value={selectedSpecialist}
+                onChange={(event) => {
                   setSelectedSpecialist(
-                    event.target
-                      .value as
+                    event.target.value as
                       | SpecialistType
                       | "all",
                   );
 
-                  setSelectedDemand(
-                    null,
-                  );
+                  setSelectedDemand(null);
                 }}
-                className="
-                  h-12
-                  w-full
-                  appearance-none
-                  rounded-xl
-                  border
-                  border-violet-400/15
-                  bg-[#151124]
-                  px-4
-                  pr-10
-                  text-sm
-                  text-white
-                  outline-none
-                  transition
-                  focus:border-violet-400/50
-                "
+                className={selectClassName}
               >
                 {specialistOptions.map(
                   (option) => (
                     <option
-                      key={
-                        option
-                      }
-                      value={
-                        option
-                      }
+                      key={option}
+                      value={option}
                     >
                       {specialistLabel(
                         option,
@@ -611,72 +427,29 @@ export default function ChallengeMap() {
                   ),
                 )}
               </select>
-
-              <ChevronDown
-                size={16}
-                className="
-                  pointer-events-none
-                  absolute
-                  right-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-[#7b7488]
-                "
-              />
-            </div>
+            </SelectWrapper>
 
             {/* EMPLOYMENT */}
 
-            <div
-              className="
-                relative
-                min-w-[190px]
-              "
-            >
+            <SelectWrapper>
               <select
-                value={
-                  selectedEmployment
-                }
-                onChange={(
-                  event,
-                ) => {
+                value={selectedEmployment}
+                onChange={(event) => {
                   setSelectedEmployment(
-                    event.target
-                      .value as
+                    event.target.value as
                       | EmploymentType
                       | "all",
                   );
 
-                  setSelectedDemand(
-                    null,
-                  );
+                  setSelectedDemand(null);
                 }}
-                className="
-                  h-12
-                  w-full
-                  appearance-none
-                  rounded-xl
-                  border
-                  border-violet-400/15
-                  bg-[#151124]
-                  px-4
-                  pr-10
-                  text-sm
-                  text-white
-                  outline-none
-                  transition
-                  focus:border-violet-400/50
-                "
+                className={selectClassName}
               >
                 {employmentOptions.map(
                   (option) => (
                     <option
-                      key={
-                        option
-                      }
-                      value={
-                        option
-                      }
+                      key={option}
+                      value={option}
                     >
                       {employmentLabel(
                         option,
@@ -685,27 +458,69 @@ export default function ChallengeMap() {
                   ),
                 )}
               </select>
+            </SelectWrapper>
 
-              <ChevronDown
-                size={16}
-                className="
-                  pointer-events-none
-                  absolute
-                  right-4
-                  top-1/2
-                  -translate-y-1/2
-                  text-[#7b7488]
-                "
-              />
-            </div>
+            {/* LOCALITY */}
+
+            <SelectWrapper>
+              <select
+                value={selectedLocality}
+                onChange={(event) => {
+                  const locality =
+                    event.target.value;
+
+                  setSelectedLocality(
+                    locality,
+                  );
+
+                  setSelectedDemand(null);
+
+                  if (
+                    locality !== "all"
+                  ) {
+                    const firstDemand =
+                      demands.find(
+                        (demand) =>
+                          demand.location
+                            .locality ===
+                          locality,
+                      );
+
+                    if (firstDemand) {
+                      setTimeout(
+                        () =>
+                          selectDemand(
+                            firstDemand,
+                          ),
+                        50,
+                      );
+                    }
+                  }
+                }}
+                className={selectClassName}
+              >
+                <option value="all">
+                  Все локации
+                </option>
+
+                {localityOptions.map(
+                  (locality) => (
+                    <option
+                      key={locality}
+                      value={locality}
+                    >
+                      {locality}
+                    </option>
+                  ),
+                )}
+              </select>
+            </SelectWrapper>
 
             {/* SHOW ALL */}
 
             <button
               type="button"
-              onClick={
-                showAllDemands
-              }
+              onClick={showAllDemands}
               className="
                 flex
                 h-12
@@ -723,9 +538,7 @@ export default function ChallengeMap() {
                 hover:bg-violet-500/[0.12]
               "
             >
-              <Navigation
-                size={16}
-              />
+              <Navigation size={16} />
 
               Показать все
             </button>
@@ -734,9 +547,7 @@ export default function ChallengeMap() {
 
             <button
               type="button"
-              onClick={
-                resetFilters
-              }
+              onClick={resetFilters}
               className="
                 flex
                 h-12
@@ -754,71 +565,52 @@ export default function ChallengeMap() {
                 hover:text-white
               "
             >
-              <RotateCcw
-                size={15}
-              />
+              <RotateCcw size={15} />
 
               Сбросить
             </button>
           </div>
         </div>
 
-        {/* FILTER RESULT */}
+        {/* RESULTS */}
 
         <div
           className="
-            mt-4
+            mt-5
             flex
             flex-wrap
             items-center
             gap-x-5
-            gap-y-2
+            gap-y-3
             border-t
             border-white/[0.05]
             pt-4
             text-xs
           "
         >
-          <span
-            className="
-              text-[#716a7e]
-            "
-          >
+          <span className="text-[#716a7e]">
             Найдено:
           </span>
 
-          <span
-            className="
-              font-medium
-              text-white
-            "
-          >
-            {
-              filteredDemands.length
-            }{" "}
-            локации
-          </span>
-
-          <span
-            className="
-              h-1
-              w-1
-              rounded-full
-              bg-[#50495c]
-            "
+          <ResultStat
+            value={uniqueLocations}
+            label="локаций"
           />
 
-          <span
-            className="
-              font-medium
-              text-violet-300
-            "
-          >
-            {
-              totalSpecialists
-            }{" "}
-            специалистов
-          </span>
+          <DividerDot />
+
+          <ResultStat
+            value={totalSpecialists}
+            label="специалистов"
+            accent
+          />
+
+          <DividerDot />
+
+          <ResultStat
+            value={uniqueSpecialties}
+            label="специальностей"
+          />
         </div>
       </div>
 
@@ -829,7 +621,7 @@ export default function ChallengeMap() {
       <div
         className="
           grid
-          lg:grid-cols-[minmax(0,1fr)_380px]
+          lg:grid-cols-[minmax(0,1fr)_390px]
         "
       >
         {/* =================================================
@@ -839,7 +631,7 @@ export default function ChallengeMap() {
         <div
           className="
             relative
-            min-h-[650px]
+            min-h-[680px]
             overflow-hidden
             border-b
             border-violet-400/10
@@ -848,28 +640,16 @@ export default function ChallengeMap() {
           "
         >
           <Map
-            ref={
-              mapRef
-            }
+            ref={mapRef}
             initialViewState={{
-              longitude:
-                69.72,
-
-              latitude:
-                54.64,
-
-              zoom:
-                7.4,
+              longitude: 69.0,
+              latitude: 54.05,
+              zoom: 5.8,
             }}
-            mapStyle={
-              mapStyle
-            }
+            mapStyle={mapStyle}
             style={{
-              width:
-                "100%",
-
-              height:
-                "650px",
+              width: "100%",
+              height: "680px",
             }}
           >
             <NavigationControl
@@ -879,29 +659,22 @@ export default function ChallengeMap() {
             {filteredDemands.map(
               (demand) => (
                 <Marker
-                  key={
-                    demand.id
-                  }
+                  key={demand.id}
                   longitude={
-                    demand
-                      .location
+                    demand.location
                       .longitude
                   }
                   latitude={
-                    demand
-                      .location
+                    demand.location
                       .latitude
                   }
                   anchor="center"
                 >
                   <DemandMarker
-                    demand={
-                      demand
-                    }
+                    demand={demand}
                     selected={
                       selectedDemand
-                        ?.id ===
-                      demand.id
+                        ?.id === demand.id
                     }
                     onClick={() =>
                       selectDemand(
@@ -914,7 +687,7 @@ export default function ChallengeMap() {
             )}
           </Map>
 
-          {/* MAP LABEL */}
+          {/* MAP TITLE */}
 
           <div
             className="
@@ -943,12 +716,10 @@ export default function ChallengeMap() {
             >
               <MapPin
                 size={15}
-                className="
-                  text-violet-400
-                "
+                className="text-violet-400"
               />
 
-              North Kazakhstan
+              Северо-Казахстанская область
             </div>
 
             <div
@@ -958,12 +729,45 @@ export default function ChallengeMap() {
                 text-[#777081]
               "
             >
-              Agricultural demand
-              map
+              Agricultural workforce demand map
             </div>
           </div>
 
-          {/* EMPTY */}
+          {/* LEGEND */}
+
+          <div
+            className="
+              pointer-events-none
+              absolute
+              bottom-4
+              left-4
+              hidden
+              rounded-xl
+              border
+              border-violet-400/10
+              bg-[#0b0816]/90
+              p-3
+              backdrop-blur-xl
+              sm:block
+            "
+          >
+            <MapLegendRow
+              color="bg-violet-600"
+              label="Высокий спрос"
+            />
+
+            <MapLegendRow
+              color="bg-amber-500"
+              label="Средний спрос"
+            />
+
+            <MapLegendRow
+              color="bg-orange-500"
+              label="Открытая позиция"
+            />
+          </div>
+
+          {/* EMPTY STATE */}
 
           {filteredDemands.length ===
             0 && (
@@ -980,7 +784,7 @@ export default function ChallengeMap() {
                 border
                 border-violet-400/20
                 bg-[#0b0816]/95
-                p-6
+                p-7
                 text-center
                 backdrop-blur-xl
               "
@@ -1010,8 +814,7 @@ export default function ChallengeMap() {
                   text-white
                 "
               >
-                Нет активного
-                спроса
+                Нет активного спроса
               </h3>
 
               <p
@@ -1022,30 +825,29 @@ export default function ChallengeMap() {
                   text-[#81798d]
                 "
               >
-                Для выбранной
-                специальности и
-                формата работы пока
-                нет опубликованных
-                потребностей.
+                Для выбранной комбинации
+                специальности, формата и
+                локации пока нет
+                опубликованных запросов.
               </p>
 
               <button
                 type="button"
-                onClick={
-                  resetFilters
-                }
+                onClick={resetFilters}
                 className="
-                  mt-4
+                  mt-5
                   rounded-xl
                   bg-violet-600
                   px-4
-                  py-2
+                  py-2.5
                   text-sm
                   font-medium
                   text-white
+                  transition
+                  hover:bg-violet-500
                 "
               >
-                Показать все
+                Сбросить фильтры
               </button>
             </div>
           )}
@@ -1057,7 +859,8 @@ export default function ChallengeMap() {
 
         <aside
           className="
-            min-h-[650px]
+            max-h-[680px]
+            overflow-y-auto
             bg-[#0c0917]
             p-5
             sm:p-6
@@ -1065,22 +868,138 @@ export default function ChallengeMap() {
         >
           {selectedDemand ? (
             <DemandDetails
-              demand={
-                selectedDemand
-              }
+              demand={selectedDemand}
+              onBack={clearSelection}
             />
           ) : (
-            <MapEmptyDetails
-              demands={
-                filteredDemands
-              }
-              onSelect={
-                selectDemand
-              }
+            <MapDemandList
+              demands={filteredDemands}
+              onSelect={selectDemand}
             />
           )}
         </aside>
       </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   SELECT WRAPPER
+========================================================= */
+
+const selectClassName = `
+  h-12
+  w-full
+  min-w-[190px]
+  appearance-none
+  rounded-xl
+  border
+  border-violet-400/15
+  bg-[#151124]
+  px-4
+  pr-10
+  text-sm
+  text-white
+  outline-none
+  transition
+  focus:border-violet-400/50
+`;
+
+function SelectWrapper({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div className="relative">
+      {children}
+
+      <ChevronDown
+        size={16}
+        className="
+          pointer-events-none
+          absolute
+          right-4
+          top-1/2
+          -translate-y-1/2
+          text-[#7b7488]
+        "
+      />
+    </div>
+  );
+}
+
+/* =========================================================
+   FILTER RESULT
+========================================================= */
+
+function ResultStat({
+  value,
+  label,
+  accent = false,
+}: {
+  value: number;
+  label: string;
+  accent?: boolean;
+}) {
+  return (
+    <span
+      className={
+        accent
+          ? "font-medium text-violet-300"
+          : "font-medium text-white"
+      }
+    >
+      {value} {label}
+    </span>
+  );
+}
+
+function DividerDot() {
+  return (
+    <span
+      className="
+        h-1
+        w-1
+        rounded-full
+        bg-[#50495c]
+      "
+    />
+  );
+}
+
+/* =========================================================
+   MAP LEGEND
+========================================================= */
+
+function MapLegendRow({
+  color,
+  label,
+}: {
+  color: string;
+  label: string;
+}) {
+  return (
+    <div
+      className="
+        flex
+        items-center
+        gap-2
+        py-1
+        text-[11px]
+        text-[#918a9e]
+      "
+    >
+      <span
+        className={`
+          h-2
+          w-2
+          rounded-full
+          ${color}
+        `}
+      />
+
+      {label}
     </div>
   );
 }
@@ -1106,15 +1025,16 @@ function DemandMarker({
   return (
     <button
       type="button"
-      onClick={
-        onClick
-      }
+      onClick={onClick}
       aria-label={`Открыть спрос в ${demand.location.locality}`}
+      title={`${demand.location.locality}: ${specialistLabel(
+        demand.specialist,
+      )}`}
       className={`
         relative
         flex
-        h-12
-        w-12
+        h-11
+        w-11
         items-center
         justify-center
         rounded-full
@@ -1124,13 +1044,14 @@ function DemandMarker({
         shadow-lg
         transition-all
         duration-200
-        hover:scale-110
+        hover:z-50
+        hover:scale-125
 
         ${colors}
 
         ${
           selected
-            ? "scale-110 ring-4 ring-violet-400/20"
+            ? "z-40 scale-125 ring-4 ring-violet-400/25"
             : ""
         }
       `}
@@ -1161,9 +1082,7 @@ function DemandMarker({
           text-white
         "
       >
-        {
-          demand.requiredCount
-        }
+        {demand.requiredCount}
       </span>
     </button>
   );
@@ -1175,17 +1094,33 @@ function DemandMarker({
 
 function DemandDetails({
   demand,
+  onBack,
 }: {
   demand: AgroDemand;
+  onBack: () => void;
 }) {
   return (
     <div>
-      {/* TYPE */}
+      <button
+        type="button"
+        onClick={onBack}
+        className="
+          mb-5
+          text-xs
+          text-[#777081]
+          transition
+          hover:text-violet-300
+        "
+      >
+        ← Все локации
+      </button>
+
+      {/* SPECIALIST + DEMAND */}
 
       <div
         className="
           flex
-          items-center
+          items-start
           justify-between
           gap-3
         "
@@ -1211,9 +1146,9 @@ function DemandDetails({
             size={14}
           />
 
-          {
-            demand.specialist
-          }
+          {specialistLabel(
+            demand.specialist,
+          )}
         </div>
 
         <DemandBadge
@@ -1237,9 +1172,11 @@ function DemandDetails({
         {demand.title}
       </h2>
 
+      {/* LOCATION */}
+
       <div
         className="
-          mt-3
+          mt-4
           flex
           items-start
           gap-2
@@ -1266,12 +1203,28 @@ function DemandDetails({
           {demand.location
             .district &&
             ` · ${demand.location.district}`}
+
+          <span
+            className="
+              mt-1
+              block
+              text-xs
+              text-[#686273]
+            "
+          >
+            {
+              demand.location
+                .region
+            }
+          </span>
         </span>
       </div>
 
+      {/* ORGANIZATION */}
+
       <div
         className="
-          mt-2
+          mt-3
           flex
           items-center
           gap-2
@@ -1281,9 +1234,7 @@ function DemandDetails({
       >
         <Building2
           size={15}
-          className="
-            text-violet-400
-          "
+          className="text-violet-400"
         />
 
         {
@@ -1314,9 +1265,7 @@ function DemandDetails({
       >
         <DetailRow
           icon={
-            <Users
-              size={16}
-            />
+            <Users size={16} />
           }
           label="Требуется"
           value={`${demand.requiredCount} ${specialistCountLabel(
@@ -1331,9 +1280,9 @@ function DemandDetails({
             />
           }
           label="Формат"
-          value={
-            demand.employmentType
-          }
+          value={employmentLabel(
+            demand.employmentType,
+          )}
         />
 
         <DetailRow
@@ -1342,7 +1291,7 @@ function DemandDetails({
               size={16}
             />
           }
-          label="Зарплата"
+          label="Оплата"
           value={
             demand.salary ??
             "Не указана"
@@ -1351,9 +1300,7 @@ function DemandDetails({
 
         <DetailRow
           icon={
-            <Home
-              size={16}
-            />
+            <Home size={16} />
           }
           label="Проживание"
           value={
@@ -1397,9 +1344,7 @@ function DemandDetails({
           {demand.skills.map(
             (skill) => (
               <span
-                key={
-                  skill
-                }
+                key={skill}
                 className="
                   rounded-lg
                   border
@@ -1447,7 +1392,7 @@ function DemandDetails({
                 text-[#797184]
               "
             >
-              Demand Readiness
+              Agricultural Demand Readiness
             </div>
 
             <div
@@ -1477,9 +1422,7 @@ function DemandDetails({
 
           <CheckCircle2
             size={24}
-            className="
-              text-violet-400
-            "
+            className="text-violet-400"
           />
         </div>
 
@@ -1511,24 +1454,32 @@ function DemandDetails({
 
       <div
         className="
-          mt-5
-          text-xs
-          text-[#746d80]
+          mt-6
+          border-t
+          border-violet-400/10
+          pt-5
         "
       >
-        Контакт организации
-      </div>
+        <div
+          className="
+            text-xs
+            uppercase
+            tracking-[0.12em]
+            text-[#746d80]
+          "
+        >
+          Контакт организации
+        </div>
 
-      <div
-        className="
-          mt-1
-          text-sm
-          text-[#b2aabd]
-        "
-      >
-        {
-          demand.contact
-        }
+        <div
+          className="
+            mt-2
+            text-sm
+            text-[#c3bbce]
+          "
+        >
+          {demand.contact}
+        </div>
       </div>
 
       {/* ACTIONS */}
@@ -1554,6 +1505,7 @@ function DemandDetails({
             border
             border-violet-400/20
             px-4
+            text-center
             text-sm
             font-medium
             text-violet-200
@@ -1561,7 +1513,7 @@ function DemandDetails({
             hover:bg-violet-500/10
           "
         >
-          Смотреть задачу
+          Смотреть запрос
         </Link>
 
         <Link
@@ -1576,6 +1528,7 @@ function DemandDetails({
             from-violet-600
             to-purple-600
             px-4
+            text-center
             text-sm
             font-semibold
             text-white
@@ -1593,10 +1546,10 @@ function DemandDetails({
 }
 
 /* =========================================================
-   EMPTY / LOCATION LIST
+   DEMAND LIST
 ========================================================= */
 
-function MapEmptyDetails({
+function MapDemandList({
   demands,
   onSelect,
 }: {
@@ -1638,9 +1591,9 @@ function MapEmptyDetails({
           text-[#817a8c]
         "
       >
-        Нажмите на маркер
-        карты или выберите
-        карточку ниже.
+        Нажмите на маркер карты или
+        выберите одну из потребностей
+        ниже.
       </p>
 
       <div
@@ -1649,14 +1602,11 @@ function MapEmptyDetails({
           space-y-3
         "
       >
-        {demands.length >
-        0 ? (
+        {demands.length > 0 ? (
           demands.map(
             (demand) => (
               <button
-                key={
-                  demand.id
-                }
+                key={demand.id}
                 type="button"
                 onClick={() =>
                   onSelect(
@@ -1692,8 +1642,7 @@ function MapEmptyDetails({
                       "
                     >
                       {
-                        demand
-                          .location
+                        demand.location
                           .locality
                       }
                     </div>
@@ -1701,18 +1650,29 @@ function MapEmptyDetails({
                     <div
                       className="
                         mt-1
+                        flex
+                        items-center
+                        gap-1.5
                         text-xs
                         text-[#746d80]
                       "
                     >
-                      {
-                        demand.specialist
-                      }
+                      <SpecialistIcon
+                        specialist={
+                          demand.specialist
+                        }
+                        size={12}
+                      />
+
+                      {specialistLabel(
+                        demand.specialist,
+                      )}
                     </div>
                   </div>
 
                   <span
                     className="
+                      whitespace-nowrap
                       text-sm
                       font-semibold
                       text-violet-300
@@ -1722,6 +1682,33 @@ function MapEmptyDetails({
                       demand.requiredCount
                     }{" "}
                     needed
+                  </span>
+                </div>
+
+                <div
+                  className="
+                    mt-3
+                    flex
+                    items-center
+                    justify-between
+                    gap-3
+                    border-t
+                    border-white/[0.05]
+                    pt-3
+                    text-[11px]
+                  "
+                >
+                  <span className="text-[#716a7e]">
+                    {employmentLabel(
+                      demand.employmentType,
+                    )}
+                  </span>
+
+                  <span className="text-[#938b9e]">
+                    {
+                      demand.readinessScore
+                    }
+                    /100
                   </span>
                 </div>
               </button>
@@ -1739,8 +1726,7 @@ function MapEmptyDetails({
               text-[#777080]
             "
           >
-            Нет подходящих
-            результатов.
+            Нет подходящих результатов.
           </div>
         )}
       </div>
@@ -1757,14 +1743,9 @@ function DetailRow({
   label,
   value,
 }: {
-  icon:
-    React.ReactNode;
-
-  label:
-    string;
-
-  value:
-    string;
+  icon: ReactNode;
+  label: string;
+  value: string;
 }) {
   return (
     <div
@@ -1788,11 +1769,7 @@ function DetailRow({
           text-[#756e81]
         "
       >
-        <span
-          className="
-            text-violet-400
-          "
-        >
+        <span className="text-violet-400">
           {icon}
         </span>
 
@@ -1801,6 +1778,7 @@ function DetailRow({
 
       <div
         className="
+          max-w-[55%]
           text-right
           text-sm
           font-medium
@@ -1814,7 +1792,7 @@ function DetailRow({
 }
 
 /* =========================================================
-   BADGE
+   DEMAND BADGE
 ========================================================= */
 
 function DemandBadge({
@@ -1822,7 +1800,10 @@ function DemandBadge({
 }: {
   level: DemandLevel;
 }) {
-  const styles = {
+  const styles: Record<
+    DemandLevel,
+    string
+  > = {
     high:
       "bg-violet-500/10 text-violet-300",
 
@@ -1833,15 +1814,13 @@ function DemandBadge({
       "bg-orange-500/10 text-orange-300",
   };
 
-  const labels = {
-    high:
-      "Высокий спрос",
-
-    medium:
-      "Средний спрос",
-
-    open:
-      "Открыто",
+  const labels: Record<
+    DemandLevel,
+    string
+  > = {
+    high: "Высокий спрос",
+    medium: "Средний спрос",
+    open: "Открыто",
   };
 
   return (
@@ -1852,7 +1831,6 @@ function DemandBadge({
         py-1
         text-[10px]
         font-medium
-
         ${styles[level]}
       `}
     >
@@ -1869,49 +1847,59 @@ function SpecialistIcon({
   specialist,
   size = 18,
 }: {
-  specialist:
-    SpecialistType;
-
+  specialist: SpecialistType;
   size?: number;
 }) {
-  if (
-    specialist ===
-    "Agronomist"
-  ) {
-    return (
-      <Sprout
-        size={size}
-      />
-    );
-  }
+  switch (specialist) {
+    case "Agronomist":
+      return (
+        <Sprout size={size} />
+      );
 
-  if (
-    specialist ===
-    "Biotechnologist"
-  ) {
-    return (
-      <FlaskConical
-        size={size}
-      />
-    );
-  }
+    case "Veterinarian":
+      return (
+        <Stethoscope size={size} />
+      );
 
-  if (
-    specialist ===
-    "Agri-engineer"
-  ) {
-    return (
-      <Wrench
-        size={size}
-      />
-    );
-  }
+    case "Biotechnologist":
+      return (
+        <FlaskConical size={size} />
+      );
 
-  return (
-    <BriefcaseBusiness
-      size={size}
-    />
-  );
+    case "Agri-engineer":
+      return (
+        <Wrench size={size} />
+      );
+
+    case "Soil scientist":
+      return (
+        <Wheat size={size} />
+      );
+
+    case "Plant protection specialist":
+      return (
+        <Sprout size={size} />
+      );
+
+    case "Food technologist":
+      return (
+        <BriefcaseBusiness
+          size={size}
+        />
+      );
+
+    case "Laboratory specialist":
+      return (
+        <Microscope size={size} />
+      );
+
+    default:
+      return (
+        <BriefcaseBusiness
+          size={size}
+        />
+      );
+  }
 }
 
 /* =========================================================
@@ -1921,18 +1909,14 @@ function SpecialistIcon({
 function demandColorClasses(
   level: DemandLevel,
 ) {
-  if (
-    level === "high"
-  ) {
+  if (level === "high") {
     return `
       bg-violet-600
       shadow-[0_0_30px_rgba(139,92,246,.65)]
     `;
   }
 
-  if (
-    level === "medium"
-  ) {
+  if (level === "medium") {
     return `
       bg-amber-500
       shadow-[0_0_30px_rgba(245,158,11,.55)]
@@ -1949,9 +1933,7 @@ function specialistLabel(
   specialist:
     SpecialistType | "all",
 ) {
-  switch (
-    specialist
-  ) {
+  switch (specialist) {
     case "Agronomist":
       return "Агрономы";
 
@@ -1964,6 +1946,18 @@ function specialistLabel(
     case "Agri-engineer":
       return "Агроинженеры";
 
+    case "Soil scientist":
+      return "Почвоведы";
+
+    case "Plant protection specialist":
+      return "Защита растений";
+
+    case "Food technologist":
+      return "Пищевые технологи";
+
+    case "Laboratory specialist":
+      return "Лабораторные специалисты";
+
     default:
       return "Все специалисты";
   }
@@ -1973,9 +1967,7 @@ function employmentLabel(
   employment:
     EmploymentType | "all",
 ) {
-  switch (
-    employment
-  ) {
+  switch (employment) {
     case "Internship":
       return "Стажировка";
 
@@ -1999,9 +1991,7 @@ function employmentLabel(
 function specialistCountLabel(
   count: number,
 ) {
-  if (
-    count === 1
-  ) {
+  if (count === 1) {
     return "специалист";
   }
 

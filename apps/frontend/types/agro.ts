@@ -1,10 +1,12 @@
 export type SpecialistType =
   | "Agronomist"
   | "Veterinarian"
-  | "Agri-engineer"
   | "Biotechnologist"
+  | "Agri-engineer"
   | "Soil scientist"
-  | "Plant protection";
+  | "Plant protection specialist"
+  | "Food technologist"
+  | "Laboratory specialist";
 
 export type EmploymentType =
   | "Internship"
@@ -20,23 +22,37 @@ export type DemandLevel =
 
 export interface AgroDemand {
   id: string;
+
   title: string;
+
   organization: string;
+
+  specialist: SpecialistType;
+
+  requiredCount: number;
+
+  employmentType: EmploymentType;
+
+  skills: string[];
+
+  salary?: string;
+
+  accommodation: boolean;
+
+  contact: string;
+
+  readinessScore: number;
+
+  demandLevel: DemandLevel;
+
+  description: string;
+
   location: {
     region: string;
     district?: string;
     locality: string;
+
     latitude: number;
     longitude: number;
   };
-  specialist: SpecialistType;
-  requiredCount: number;
-  employmentType: EmploymentType;
-  skills: string[];
-  salary?: string;
-  accommodation: boolean;
-  contact: string;
-  readinessScore: number;
-  demandLevel: DemandLevel;
-  description: string;
 }

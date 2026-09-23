@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
+import AiChat from "@/components/ai/AiChat";
 
 export default function HomePage() {
   return (
     <>
+    <AiChat />
       <div className="relative min-h-screen flex flex-col">
         {/* Фоновое свечение */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -12,11 +14,6 @@ export default function HomePage() {
         </div>
 
         <Container className="relative z-10 flex-1 flex flex-col items-center justify-center py-20 text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border-neon-purple/30 text-sm text-neon-purple mb-8">
-            <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse-slow" />
-            Платформа хакатона AI Sana
-          </div>
 
           {/* Заголовок */}
           <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 max-w-5xl">

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import "maplibre-gl/dist/maplibre-gl.css";
+import AiChat from "@/components/ai/AiChat";
 
 const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
         <main className="pt-20">
           {children}
         </main>
+        <AiChat />
       </body>
     </html>
   );
